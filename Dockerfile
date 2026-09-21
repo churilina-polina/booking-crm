@@ -14,7 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN adduser --disabled-password --no-create-home appuser
+RUN adduser --disabled-password --gecos "" --home /app --no-create-home appuser \
+    && mkdir -p /app/staticfiles \
+    && chown -R appuser:appuser /app
 USER appuser
 
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
