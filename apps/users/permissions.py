@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAdmin(BasePermission):
@@ -8,11 +8,7 @@ class IsAdmin(BasePermission):
 
 class IsStaffOrAdmin(BasePermission):
     def has_permission(self, request, view):
-        return bool(
-            request.user
-            and request.user.is_authenticated
-            and request.user.role in ('admin', 'staff')
-        )
+        return bool(request.user and request.user.is_authenticated and request.user.role in ('admin', 'staff'))
 
 
 class IsOwnerOrStaff(BasePermission):
@@ -37,8 +33,4 @@ class ReadOnlyOrStaff(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return bool(request.user and request.user.is_authenticated)
-        return bool(
-            request.user
-            and request.user.is_authenticated
-            and request.user.role in ('admin', 'staff')
-        )
+        return bool(request.user and request.user.is_authenticated and request.user.role in ('admin', 'staff'))

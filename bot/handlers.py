@@ -87,7 +87,9 @@ async def confirm_booking(callback: CallbackQuery, state: FSMContext):
     client = await svc.get_or_create_client(callback.from_user.id, callback.from_user.full_name)
     try:
         await svc.create_booking(
-            client.id, data['employee_id'], data['service_id'],
+            client.id,
+            data['employee_id'],
+            data['service_id'],
             datetime.fromisoformat(data['start_time']),
         )
         await callback.message.edit_text('Запись создана! Ждём вас 🎉')

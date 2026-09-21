@@ -1,9 +1,10 @@
 import logging
 from datetime import timedelta
 
-from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
+
+from celery import shared_task
 
 from apps.bookings.models import Booking
 
@@ -32,7 +33,8 @@ def send_upcoming_booking_reminders():
         try:
             send_telegram_reminder(booking)
             NotificationLog.objects.create(
-                booking=booking, channel=NotificationLog.Channel.TELEGRAM,
+                booking=booking,
+                channel=NotificationLog.Channel.TELEGRAM,
                 status=NotificationLog.Status.SENT,
             )
             booking.reminder_sent = True
@@ -41,8 +43,10 @@ def send_upcoming_booking_reminders():
         except Exception as exc:  # noqa: BLE001 — log and continue with next booking
             logger.exception('Failed to send reminder for booking %s', booking.id)
             NotificationLog.objects.create(
-                booking=booking, channel=NotificationLog.Channel.TELEGRAM,
-                status=NotificationLog.Status.FAILED, error_message=str(exc),
+                booking=booking,
+                channel=NotificationLog.Channel.TELEGRAM,
+                status=NotificationLog.Status.FAILED,
+                error_message=str(exc),
             )
     return sent
 

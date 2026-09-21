@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 
-from asgiref.sync import sync_to_async
 from django.utils import timezone
+
+from asgiref.sync import sync_to_async
 
 MAX_DAYS_AHEAD = 7
 SLOT_STEP_MINUTES = 30

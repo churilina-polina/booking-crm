@@ -25,7 +25,8 @@ class Command(BaseCommand):
         services = []
         for name, duration, price in services_data:
             service, _ = Service.objects.get_or_create(
-                name=name, defaults={'duration_minutes': duration, 'price': price},
+                name=name,
+                defaults={'duration_minutes': duration, 'price': price},
             )
             services.append(service)
 
@@ -42,7 +43,8 @@ class Command(BaseCommand):
 
         for weekday in range(5):  # Mon-Fri
             WorkingHours.objects.get_or_create(
-                employee=employee, weekday=weekday,
+                employee=employee,
+                weekday=weekday,
                 defaults={'start_time': '09:00', 'end_time': '18:00'},
             )
 

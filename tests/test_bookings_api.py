@@ -1,8 +1,9 @@
 from datetime import timedelta
 
-import pytest
 from django.urls import reverse
 from django.utils import timezone
+
+import pytest
 
 from apps.bookings.models import Booking
 from tests.factories import UserFactory
@@ -32,7 +33,9 @@ def test_client_can_create_booking(auth_client, employee, service):
 def test_client_sees_only_own_bookings(auth_client, client_user, employee, service):
     other_client = UserFactory()
     Booking.objects.create(
-        client=other_client, employee=employee, service=service,
+        client=other_client,
+        employee=employee,
+        service=service,
         start_time=timezone.now() + timedelta(days=1),
         end_time=timezone.now() + timedelta(days=1, hours=1),
     )
@@ -44,7 +47,9 @@ def test_client_sees_only_own_bookings(auth_client, client_user, employee, servi
 
 def test_client_can_cancel_own_booking(auth_client, client_user, employee, service):
     booking = Booking.objects.create(
-        client=client_user, employee=employee, service=service,
+        client=client_user,
+        employee=employee,
+        service=service,
         start_time=timezone.now() + timedelta(days=1),
         end_time=timezone.now() + timedelta(days=1, hours=1),
     )

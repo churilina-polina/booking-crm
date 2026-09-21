@@ -13,7 +13,9 @@ class Booking(models.Model):
         COMPLETED = 'completed', 'Завершена'
 
     client = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings',
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='bookings',
     )
     employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name='bookings')
     service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name='bookings')

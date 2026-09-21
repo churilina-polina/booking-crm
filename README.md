@@ -16,7 +16,9 @@ Backend-система онлайн-записи и учёта заказов д
 - **drf-spectacular** — автогенерация OpenAPI-схемы и Swagger UI
 - **pytest + pytest-django + factory_boy** — тесты моделей и API
 - **Docker / docker-compose** — контейнеризация всех сервисов
-- **GitHub Actions** — CI (lint + тесты на каждый push/PR)
+- **GitHub Actions** — CI (lint, форматирование, тесты на каждый push/PR)
+- **black + isort + flake8** — единый стиль кода, проверяется в CI
+- Троттлинг запросов (DRF throttling), `/health/` для проверки готовности сервиса
 
 ## Архитектура
 
@@ -58,7 +60,7 @@ docker compose exec web python manage.py seed_demo_data
 
 ```bash
 python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # requirements.txt — только рантайм-зависимости
 cp .env.example .env   # для локальных тестов можно поставить USE_SQLITE_FOR_TESTS=True
 python manage.py migrate
 python manage.py seed_demo_data
@@ -72,7 +74,12 @@ python manage.py runserver
 ```bash
 pytest --cov=apps
 flake8 apps config bot tests --max-line-length=120 --exclude=migrations
+black --check --line-length=120 --extend-exclude=migrations apps config bot tests manage.py
+isort --check-only --profile=black --line-length=120 --skip=migrations apps config bot tests manage.py
 ```
+
+21 тест покрывает бизнес-логику (конфликт слотов), права доступа по ролям, аутентификацию,
+отчёты и фоновую задачу напоминаний.
 
 ## Основные эндпоинты
 
@@ -80,5 +87,11 @@ flake8 apps config bot tests --max-line-length=120 --exclude=migrations
 - `GET/POST /api/v1/services/`, `/api/v1/employees/` — каталог услуг и сотрудников
 - `GET/POST /api/v1/bookings/`, `POST /api/v1/bookings/{id}/confirm|cancel|complete/`
 - `GET/POST /api/v1/payments/`, `POST /api/v1/payments/{id}/mark_paid/`
+- `GET /api/v1/reports/revenue/`, `GET /api/v1/reports/employee-load/` — аналитика для admin/staff
+- `GET /health/` — health-check (используется в Docker/деплое)
 
 Полная интерактивная документация — в Swagger UI (`/api/docs/`).
+
+## Деплой
+
+См. [DEPLOY.md](DEPLOY.md) — инструкция для Render.com и обычного VPS.

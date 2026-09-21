@@ -24,7 +24,9 @@ class Service(models.Model):
 
 class Employee(models.Model):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employee_profile',
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='employee_profile',
         limit_choices_to={'role': 'staff'},
     )
     specialization = models.CharField(max_length=200, blank=True)

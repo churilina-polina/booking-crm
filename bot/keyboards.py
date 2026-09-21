@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 
 MAIN_MENU = ReplyKeyboardMarkup(
     keyboard=[
@@ -45,10 +45,12 @@ def confirm_keyboard():
 
 def cancel_bookings_keyboard(bookings):
     rows = [
-        [InlineKeyboardButton(
-            text=f'{b.service.name} {b.start_time:%d.%m %H:%M}',
-            callback_data=f'cancel_booking:{b.id}',
-        )]
+        [
+            InlineKeyboardButton(
+                text=f'{b.service.name} {b.start_time:%d.%m %H:%M}',
+                callback_data=f'cancel_booking:{b.id}',
+            )
+        ]
         for b in bookings
     ]
     return InlineKeyboardMarkup(inline_keyboard=rows)

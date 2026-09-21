@@ -15,8 +15,13 @@ class ServiceViewSet(viewsets.ModelViewSet):
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
-    queryset = Employee.objects.filter(is_active=True).select_related('user').prefetch_related(
-        'services', 'working_hours',
+    queryset = (
+        Employee.objects.filter(is_active=True)
+        .select_related('user')
+        .prefetch_related(
+            'services',
+            'working_hours',
+        )
     )
     serializer_class = EmployeeSerializer
     permission_classes = (ReadOnlyOrStaff,)

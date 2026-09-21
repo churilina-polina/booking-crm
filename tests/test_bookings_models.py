@@ -1,8 +1,9 @@
 from datetime import timedelta
 
-import pytest
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+
+import pytest
 
 from apps.bookings.models import Booking
 from tests.factories import UserFactory
@@ -53,8 +54,11 @@ def test_non_overlapping_booking_is_allowed(client_user, employee, service):
 def test_end_before_start_is_rejected(client_user, employee, service):
     start = timezone.now() + timedelta(hours=1)
     booking = Booking(
-        client=client_user, employee=employee, service=service,
-        start_time=start, end_time=start - timedelta(minutes=10),
+        client=client_user,
+        employee=employee,
+        service=service,
+        start_time=start,
+        end_time=start - timedelta(minutes=10),
     )
     with pytest.raises(ValidationError):
         booking.save()

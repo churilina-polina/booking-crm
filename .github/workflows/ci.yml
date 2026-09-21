@@ -51,10 +51,15 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
 
       - name: Lint
         run: flake8 apps config bot tests --max-line-length=120 --exclude=migrations
+
+      - name: Check formatting
+        run: |
+          black --check --line-length=120 --extend-exclude=migrations apps config bot tests manage.py
+          isort --check-only --profile=black --line-length=120 --skip=migrations apps config bot tests manage.py
 
       - name: Run migrations
         run: python manage.py migrate

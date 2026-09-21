@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+extend-exclude = "migrations"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip = ["migrations"]
+known_django = ["django", "rest_framework"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
