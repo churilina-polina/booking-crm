@@ -140,6 +140,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API для онлайн-записи, учёта заказов и клиентов сервисного бизнеса.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/api/v1',
 }
 
 # --- Celery ---

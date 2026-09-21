@@ -35,6 +35,21 @@ tests/           — фабрики данных и тесты (модели + A
 Ключевое бизнес-правило — недопущение пересечения записей одного сотрудника —
 реализовано на уровне модели (`Booking.clean`) и покрыто тестами, поэтому конфликт
 слотов невозможен независимо от того, откуда пришёл запрос: из REST API или из бота.
+Расчёт свободных слотов вынесен в `apps/bookings/availability.py` и переиспользуется
+и REST-эндпоинтом, и ботом — без дублирования логики.
+
+```mermaid
+flowchart LR
+    Client[Клиент] -->|REST API| DRF[Django REST Framework]
+    Client -->|Telegram| Bot[aiogram bot]
+    Bot --> ORM[(Django ORM)]
+    DRF --> ORM
+    ORM --> DB[(PostgreSQL)]
+    DRF --> Celery[Celery worker]
+    Celery --> Redis[(Redis)]
+    Celery -->|напоминания| Telegram[Telegram Bot API]
+    Beat[Celery beat] --> Celery
+```
 
 ## Роли
 
@@ -56,6 +71,8 @@ docker compose exec web python manage.py seed_demo_data
 - Swagger: http://localhost:8000/api/docs/
 - Админка: http://localhost:8000/admin/ (admin / admin12345 после seed)
 
+![Swagger UI](docs/screenshots/swagger.png)
+
 ## Локальный запуск без Docker
 
 ```bash
@@ -69,25 +86,26 @@ python manage.py runserver
 
 Бот отдельным процессом: `python -m bot.main` (требуется `TELEGRAM_BOT_TOKEN` в `.env`).
 
-## Тесты
+## Тесты и качество кода
 
 ```bash
-pytest --cov=apps
-flake8 apps config bot tests --max-line-length=120 --exclude=migrations
-black --check --line-length=120 --extend-exclude=migrations apps config bot tests manage.py
-isort --check-only --profile=black --line-length=120 --skip=migrations apps config bot tests manage.py
+make check   # lint + format-check + tests, то же самое, что гоняет CI
+make format  # автоформатирование black + isort
+make test    # только тесты с покрытием
 ```
 
-21 тест покрывает бизнес-логику (конфликт слотов), права доступа по ролям, аутентификацию,
-отчёты и фоновую задачу напоминаний.
+26 тестов покрывают бизнес-логику (конфликт слотов), права доступа по ролям, аутентификацию,
+отчёты, экспорт и фоновую задачу напоминаний.
 
 ## Основные эндпоинты
 
 - `POST /api/v1/auth/register/`, `POST /api/v1/auth/token/` — регистрация и JWT
 - `GET/POST /api/v1/services/`, `/api/v1/employees/` — каталог услуг и сотрудников
+- `GET /api/v1/employees/{id}/available_slots/?service=&date=` — свободные слоты
 - `GET/POST /api/v1/bookings/`, `POST /api/v1/bookings/{id}/confirm|cancel|complete/`
 - `GET/POST /api/v1/payments/`, `POST /api/v1/payments/{id}/mark_paid/`
 - `GET /api/v1/reports/revenue/`, `GET /api/v1/reports/employee-load/` — аналитика для admin/staff
+- `GET /api/v1/reports/bookings/export/` — выгрузка записей в CSV
 - `GET /health/` — health-check (используется в Docker/деплое)
 
 Полная интерактивная документация — в Swagger UI (`/api/docs/`).
