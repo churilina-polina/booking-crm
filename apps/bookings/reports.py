@@ -1,4 +1,7 @@
+import csv
+
 from django.db.models import Count, Q, Sum
+from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from rest_framework.response import Response
@@ -73,3 +76,37 @@ class EmployeeLoadReportView(APIView):
                 'employees': list(rows),
             }
         )
+
+
+class BookingsCSVExportView(APIView):
+    """Export bookings for a period as CSV (for accounting / offline analysis)."""
+
+    permission_classes = (IsStaffOrAdmin,)
+
+    def get(self, request):
+        date_from, date_to = _parse_period(request)
+        bookings = (
+            Booking.objects.filter(start_time__date__range=(date_from, date_to))
+            .select_related('client', 'employee__user', 'service')
+            .order_by('start_time')
+        )
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="bookings_{date_from}_{date_to}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Дата', 'Время', 'Клиент', 'Сотрудник', 'Услуга', 'Статус', 'Сумма'])
+        for booking in bookings:
+            payment = getattr(booking, 'payment', None)
+            writer.writerow(
+                [
+                    booking.start_time.date().isoformat(),
+                    timezone.localtime(booking.start_time).strftime('%H:%M'),
+                    booking.client.get_full_name() or booking.client.username,
+                    booking.employee.user.get_full_name() or booking.employee.user.username,
+                    booking.service.name,
+                    booking.get_status_display(),
+                    payment.amount if payment else '',
+                ]
+            )
+        return response

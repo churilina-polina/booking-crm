@@ -1,11 +1,6 @@
-from datetime import datetime, timedelta
-
 from django.utils import timezone
 
 from asgiref.sync import sync_to_async
-
-MAX_DAYS_AHEAD = 7
-SLOT_STEP_MINUTES = 30
 
 
 @sync_to_async
@@ -24,50 +19,21 @@ def get_employees_for_service(service_id):
 
 @sync_to_async
 def get_available_dates(employee_id):
+    from apps.bookings.availability import get_available_dates as _get_available_dates
     from apps.services.models import Employee
 
     employee = Employee.objects.get(id=employee_id)
-    working_weekdays = set(employee.working_hours.values_list('weekday', flat=True))
-    today = timezone.localdate()
-    return [
-        today + timedelta(days=offset)
-        for offset in range(MAX_DAYS_AHEAD)
-        if (today + timedelta(days=offset)).weekday() in working_weekdays
-    ]
+    return _get_available_dates(employee)
 
 
 @sync_to_async
 def get_available_slots(employee_id, service_id, date):
-    from apps.bookings.models import Booking
+    from apps.bookings.availability import get_available_slots as _get_available_slots
     from apps.services.models import Employee, Service
 
     employee = Employee.objects.get(id=employee_id)
     service = Service.objects.get(id=service_id)
-    working_hours = employee.working_hours.filter(weekday=date.weekday()).first()
-    if not working_hours:
-        return []
-
-    tz = timezone.get_current_timezone()
-    current = timezone.make_aware(datetime.combine(date, working_hours.start_time), tz)
-    end_of_day = timezone.make_aware(datetime.combine(date, working_hours.end_time), tz)
-    duration = service.duration
-
-    existing = list(
-        Booking.objects.filter(
-            employee=employee,
-            start_time__date=date,
-            status__in=(Booking.Status.PENDING, Booking.Status.CONFIRMED),
-        )
-    )
-
-    slots = []
-    now = timezone.now()
-    while current + duration <= end_of_day:
-        overlaps = any(b.start_time < current + duration and b.end_time > current for b in existing)
-        if not overlaps and current > now:
-            slots.append(current)
-        current += timedelta(minutes=SLOT_STEP_MINUTES)
-    return slots
+    return _get_available_slots(employee, service, date)
 
 
 @sync_to_async

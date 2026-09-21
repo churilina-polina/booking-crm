@@ -49,3 +49,18 @@ def test_employee_load_report(api_client, employee, paid_booking):
     response = api_client.get(reverse('report-employee-load'), _period_covering(paid_booking))
     assert response.status_code == 200
     assert response.data['employees'][0]['bookings_count'] == 1
+
+
+def test_client_cannot_export_bookings_csv(auth_client, paid_booking):
+    response = auth_client.get(reverse('report-bookings-export'))
+    assert response.status_code == 403
+
+
+def test_staff_can_export_bookings_csv(api_client, employee, paid_booking):
+    api_client.force_authenticate(user=employee.user)
+    response = api_client.get(reverse('report-bookings-export'), _period_covering(paid_booking))
+    assert response.status_code == 200
+    assert response['Content-Type'] == 'text/csv'
+    body = response.content.decode('utf-8')
+    assert paid_booking.service.name in body
+    assert paid_booking.client.username in body
