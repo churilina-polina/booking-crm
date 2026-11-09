@@ -7,9 +7,19 @@ from django.utils.dateparse import parse_date
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+
 from apps.users.permissions import IsStaffOrAdmin
 
 from .models import Booking, Payment
+
+PERIOD_PARAMS = [
+    OpenApiParameter(
+        'date_from', OpenApiTypes.DATE, description='Начало периода (по умолчанию — начало текущего месяца)'
+    ),
+    OpenApiParameter('date_to', OpenApiTypes.DATE, description='Конец периода (по умолчанию — сегодня)'),
+]
 
 
 def _parse_period(request):
@@ -20,6 +30,7 @@ def _parse_period(request):
     return date_from, date_to
 
 
+@extend_schema(tags=['reports'], parameters=PERIOD_PARAMS, responses=OpenApiTypes.OBJECT)
 class RevenueReportView(APIView):
     """Revenue and booking counts by status for a given period (defaults to current month)."""
 
@@ -50,6 +61,7 @@ class RevenueReportView(APIView):
         )
 
 
+@extend_schema(tags=['reports'], parameters=PERIOD_PARAMS, responses=OpenApiTypes.OBJECT)
 class EmployeeLoadReportView(APIView):
     """Bookings count and revenue per employee for a given period."""
 
@@ -78,6 +90,7 @@ class EmployeeLoadReportView(APIView):
         )
 
 
+@extend_schema(tags=['reports'], parameters=PERIOD_PARAMS, responses={(200, 'text/csv'): OpenApiTypes.STR})
 class BookingsCSVExportView(APIView):
     """Export bookings for a period as CSV (for accounting / offline analysis)."""
 

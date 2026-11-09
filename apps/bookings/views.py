@@ -16,6 +16,8 @@ class BookingViewSet(viewsets.ModelViewSet):
     ordering_fields = ('start_time', 'created_at')
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Booking.objects.none()
         qs = Booking.objects.select_related('client', 'employee__user', 'service')
         user = self.request.user
         if user.role in ('admin', 'staff'):

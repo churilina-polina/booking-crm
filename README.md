@@ -102,7 +102,7 @@ docker compose exec web python manage.py seed_demo_data
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements-dev.txt   # requirements.txt — только рантайм-зависимости
-cp .env.example .env   # для локальных тестов можно поставить USE_SQLITE_FOR_TESTS=True
+cp .env.example .env   # для локальных тестов можно поставить USE_SQLITE=True
 python manage.py migrate
 python manage.py seed_demo_data
 python manage.py runserver
@@ -133,6 +133,17 @@ make test    # только тесты с покрытием
 - `GET /health/` — health-check (используется в Docker/деплое)
 
 Полная интерактивная документация — в Swagger UI (`/api/docs/`).
+
+## Демо-деплой на Render (бесплатно)
+
+В репозитории есть `render.yaml`: Render собирает Docker-образ, использует SQLite и при каждом
+старте применяет миграции и наполняет базу демо-данными (`seed_demo_data`). Бесплатный сервис
+засыпает через 15 минут без запросов и просыпается примерно за минуту, а данные после перезапуска
+создаются заново: этого достаточно для демонстрации.
+
+1. На render.com выберите New → Blueprint и подключите этот репозиторий.
+2. Дождитесь деплоя и откройте `<адрес сервиса>/api/docs/`.
+3. Демо-логины: `admin` / `admin12345` и `master_anna` / `staff12345` (только демо-данные).
 
 ## Деплой
 
