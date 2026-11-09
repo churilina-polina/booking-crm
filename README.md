@@ -1,10 +1,34 @@
 # Booking CRM
 
+[![CI](https://github.com/churilina-polina/booking-crm/actions/workflows/ci.yml/badge.svg)](https://github.com/churilina-polina/booking-crm/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-5.1-092E20?logo=django&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+
 Backend-система онлайн-записи и учёта заказов для сервисного бизнеса (салон, мастерская,
 консультации и т.п.): клиенты записываются на услуги через REST API или Telegram-бота,
 администратор ведёт расписание сотрудников и оплаты.
 
 Разработано по заказу ИП как коммерческий проект.
+
+> **In short (EN):** backend for an appointment-booking CRM for service businesses.
+> REST API (Django REST Framework, JWT, role-based access), conflict-free slot booking,
+> Telegram bot (aiogram), Celery/Redis reminders, reports with CSV export, Swagger docs,
+> Docker, GitHub Actions CI, 26 automated tests.
+
+## Как вёлся проект
+
+Работа была разбита на 4 этапа, на каждом — проверяемый результат:
+
+1. **Основа:** модели данных, авторизация (JWT), базовый CRUD API.
+2. **Бизнес-логика:** проверка занятости слотов, статусы записей, права по ролям, тесты.
+3. **Каналы и автоматизация:** Telegram-бот для записи и фоновые напоминания (Celery + Redis).
+4. **Выпуск:** Docker, CI, Swagger-документация, отчёты и CSV-экспорт, инструкция по деплою.
+
+Что выяснилось при проверке перед сдачей и было исправлено: отчёты считали «сегодня» по
+времени сервера, а не бизнеса; анонимный запрос к списку записей давал 500 вместо 401;
+контейнер не мог записать статику из-за прав пользователя. Часть случаев закрыта
+автотестами, а работоспособность контейнеров проверена полным запуском docker-compose.
 
 ## Стек
 
