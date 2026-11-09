@@ -14,7 +14,7 @@ pytestmark = pytest.mark.django_db
 def _next_working_date(employee):
     working_weekdays = set(employee.working_hours.values_list('weekday', flat=True))
     today = timezone.localdate()
-    for offset in range(8):
+    for offset in range(1, 9):
         candidate = today + timedelta(days=offset)
         if candidate.weekday() in working_weekdays:
             return candidate
